@@ -53,7 +53,7 @@ class CLI
   def view(*args)
     vo = ViewOption.new(
       1,
-      20,
+      50,
       false,
     )
     OptionParser.new { |opt|
