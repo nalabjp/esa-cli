@@ -137,7 +137,7 @@ class CLI
         system('open', posts[off]['url'])
       when 0x0d # Enter
         post = posts[off]
-        IO.popen("less -r", "w") do |io|
+        IO.popen("less -rc -+F", "w") do |io|
           io.puts post["url"]
           io.puts post["full_name"].to_bold
           io.puts
