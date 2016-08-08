@@ -22,7 +22,7 @@ class CLI
     @client = client
   end
 
-  HELP_LINE = "j:down, k:up, l:next, h:back, o:open, Enter:show, q:quit"
+  HELP_LINE = "j:down, k:up, l:next, h:back, o:open, r:reload, Enter:show, q:quit"
 
   def run(argv)
     if 0 < argv.length && respond_to?(argv[0])
@@ -46,11 +46,13 @@ class CLI
 
   ViewOption = Struct.new(
     :page,
+    :init_page,
     :per_page,
     :raw,
   )
   def view(*args)
     vo = ViewOption.new(
+      1,
       1,
       50,
       false,
@@ -58,6 +60,7 @@ class CLI
     OptionParser.new { |opt|
       opt.on('--page NUM', 'page number (default 1)', Integer) do |arg|
         vo.page = arg
+        vo.init_page = arg
       end
       opt.on('--per-page NUM', 'page size (default 20)', Integer) do |arg|
         vo.per_page = arg
@@ -131,6 +134,10 @@ class CLI
         refresh.call
       when 0x68 # h
         vo.page -= 1 if 0 < vo.page
+        refresh.call
+      when 0x72 # r
+        vo.page = vo.init_page
+        cache.clear
         refresh.call
       when 0x6f # o
         system('open', posts[off]['url'])
