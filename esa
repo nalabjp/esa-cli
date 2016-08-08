@@ -6,6 +6,7 @@ require 'io/console'
 require 'optparse'
 require 'open-uri'
 require 'esa'
+require 'pry'
 
 class String
   def to_bold
@@ -22,7 +23,7 @@ class CLI
     @client = client
   end
 
-  HELP_LINE = "j:down, k:up, l: next, h: back, Enter:show, q: quit"
+  HELP_LINE = "j:down, k:up, l: next, h: back, o:open, Enter:show, q: quit"
 
   def run(argv)
     if 0 < argv.length && respond_to?(argv[0])
@@ -132,6 +133,8 @@ class CLI
       when 0x68 # h
         vo.page -= 1 if 0 < vo.page
         refresh.call
+      when 0x6f # o
+        system('open', posts[off]['url'])
       when 0x0d # Enter
         post = posts[off]
         IO.popen("less -r", "w") do |io|
