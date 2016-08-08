@@ -23,7 +23,7 @@ class CLI
     @client = client
   end
 
-  HELP_LINE = "j:down, k:up, l: next, h: back, o:open, Enter:show, q: quit"
+  HELP_LINE = "j:down, k:up, l:next, h:back, o:open, Enter:show, q:quit"
 
   def run(argv)
     if 0 < argv.length && respond_to?(argv[0])
