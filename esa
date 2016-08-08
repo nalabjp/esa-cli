@@ -76,7 +76,7 @@ class CLI
       posts = cache[vo.page]
       max_screen_name_len = posts.map { |post| post["created_by"]["screen_name"].length }.max
       lines = posts.map do |post|
-        sprintf("%#{max_screen_name_len}s: %s", post["created_by"]["screen_name"], post["full_name"])
+        sprintf("%#{max_screen_name_len}s: %s [%s]", post["created_by"]["screen_name"], post["full_name"], Time.parse(post['updated_at']).strftime('%Y/%m/%d %H:%M'))
       end
       off = 0
     end
