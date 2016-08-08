@@ -6,7 +6,6 @@ require 'io/console'
 require 'optparse'
 require 'open-uri'
 require 'esa'
-require 'pry'
 
 class String
   def to_bold
