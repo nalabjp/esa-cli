@@ -113,7 +113,7 @@ class CLI
       buf = "#{HELP_LINE.to_bold}\n"
       lines.each_with_index do |line, i|
         buf << if off == i
-                 "\e[30;47m#{line}\e[0m\n"
+                 "\e[30;34m#{line}\e[0m\n"
                else
                  "#{line}\n"
                end
