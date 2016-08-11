@@ -146,12 +146,12 @@ class CLI
       when 0x68 # h
         vo.page -= 1 if 0 < vo.page
         refresh.call
+      when 0x6f # o
+        system('open', posts[off]['url'])
       when 0x72 # r
         vo.page = vo.init_page
         cache.clear
         refresh.call
-      when 0x6f # o
-        system('open', posts[off]['url'])
       when 0x0d # Enter
         post = posts[off]
         IO.popen("less -rc -+F", "w") do |io|
