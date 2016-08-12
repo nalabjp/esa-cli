@@ -44,21 +44,22 @@ class CLI
     puts @client.public_send(method, params, header).body.to_json
   end
 
-  ViewOption = Struct.new(
-    :page,
-    :init_page,
-    :per_page,
-    :raw,
-    :auto_reload
-  )
+  VIEW_OPTION_ATTRS = {
+    page: 1,
+    init_page: 1,
+    per_page: 20,
+    raw: false,
+    auto_reload: nil,
+    q: nil
+  }
+  ViewOption = Struct.new(*VIEW_OPTION_ATTRS.keys) do
+    def to_h
+      super.delete_if {|k,_| %i(init_page auto_reload).include?(k) }
+    end
+  end
+
   def view(*args)
-    vo = ViewOption.new(
-      1,
-      1,
-      20,
-      false,
-      nil
-    )
+    vo = ViewOption.new(*VIEW_OPTION_ATTRS.values)
     OptionParser.new { |opt|
       opt.on('-p NUM', '--page NUM', 'page number (default 1)', Integer) do |arg|
         vo.page = arg
@@ -72,6 +73,9 @@ class CLI
       end
       opt.on('-a NUM', '--auto-reload NUM', 'duration of auto-reload  [minutes](default nil)', Integer) do |arg|
         vo.auto_reload = arg * 60
+      end
+      opt.on('-q QUERY', '--query QUERY', 'query string (default nil)') do |arg|
+        vo.q = arg
       end
     }.parse!(args)
     @client.current_team = args.shift if args.empty?.!
@@ -97,6 +101,7 @@ class CLI
           if vo.raw
             results[index] = line
           else
+            # p open(m[2], 'rb', &:read)
             threads << Thread.new(line, m) do |line, m|
               img = IO.popen("imgcat", 'w+b') do |io|
                 io.print open(m[2], 'rb', &:read)
@@ -154,7 +159,7 @@ class CLI
         refresh.call
       when 0x0d # Enter
         post = posts[off]
-        IO.popen("less -rc -+F", "w") do |io|
+        IO.popen(less_cmd(vo.q), "w") do |io|
           io.puts post["url"]
           io.puts post["full_name"].to_bold
           io.puts
@@ -174,6 +179,29 @@ class CLI
       raise "#{res.status} #{res.body['message']}"
     end
     res.body["posts"]
+  end
+
+  def less_cmd(query_string)
+    @less_cmd ||= begin
+                    cmds = %W(less -rc -+F)
+                    pattern_opt = less_pattern_option(query_string)
+                    cmds.push(pattern_opt) if pattern_opt
+                    cmds.join(' ')
+                  end
+  end
+
+  def less_pattern_option(query_string)
+    return if query_string.nil?
+    queries = query_string.split(' ')
+    res = queries.each.with_object([]) do |item, arr|
+      key, val = item.split(':')
+      if val.nil?
+        arr.push(key) unless key.start_with?('-')
+      else
+        arr.push(val) if %w(name title category in body).include?(key)
+      end
+    end
+    res.empty? ? nil : "-p '#{res.join('|')}'"
   end
 end
 
