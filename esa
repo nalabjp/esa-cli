@@ -55,7 +55,7 @@ class CLI
     vo = ViewOption.new(
       1,
       1,
-      50,
+      20,
       false,
       nil
     )
