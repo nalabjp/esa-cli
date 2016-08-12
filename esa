@@ -60,17 +60,17 @@ class CLI
       nil
     )
     OptionParser.new { |opt|
-      opt.on('--page NUM', 'page number (default 1)', Integer) do |arg|
+      opt.on('-p NUM', '--page NUM', 'page number (default 1)', Integer) do |arg|
         vo.page = arg
         vo.init_page = arg
       end
-      opt.on('--per-page NUM', 'page size (default 20)', Integer) do |arg|
+      opt.on('-P NUM', '--per-page NUM', 'page size (default 20)', Integer) do |arg|
         vo.per_page = arg
       end
       opt.on('-r', '--raw', 'show raw markdown mode (default false)') do |arg|
         vo.raw = arg
       end
-      opt.on('--auto-reload NUM', 'duration of auto-reload  [minutes](default nil)', Integer) do |arg|
+      opt.on('-a NUM', '--auto-reload NUM', 'duration of auto-reload  [minutes](default nil)', Integer) do |arg|
         vo.auto_reload = arg * 60
       end
     }.parse!(args)
