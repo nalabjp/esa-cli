@@ -49,6 +49,7 @@ class CLI
     :init_page,
     :per_page,
     :raw,
+    :auto_reload
   )
   def view(*args)
     vo = ViewOption.new(
@@ -56,6 +57,7 @@ class CLI
       1,
       50,
       false,
+      nil
     )
     OptionParser.new { |opt|
       opt.on('--page NUM', 'page number (default 1)', Integer) do |arg|
@@ -67,6 +69,9 @@ class CLI
       end
       opt.on('-r', '--raw', 'show raw markdown mode (default false)') do |arg|
         vo.raw = arg
+      end
+      opt.on('--auto-reload NUM', 'duration of auto-reload  [minutes](default nil)', Integer) do |arg|
+        vo.auto_reload = arg * 60
       end
     }.parse!(args)
     @client.current_team = args.shift if args.empty?.!
@@ -123,7 +128,13 @@ class CLI
       buf << "\e[#{lines.length + 1}A"
       print buf
 
-      ch = $stdin.getch.ord
+      ch = nil
+      begin
+        ch = Timeout.timeout(vo.auto_reload) { $stdin.getch.ord }
+      rescue Timeout::Error
+        ch = 0x72
+      end
+
       case ch
       when 0x6a # j
         off += 1 if off + 1 < lines.length
