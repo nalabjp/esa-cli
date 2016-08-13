@@ -101,16 +101,17 @@ class CLI
           if vo.raw
             results[index] = line
           else
-            # p open(m[2], 'rb', &:read)
-            threads << Thread.new(line, m) do |line, m|
-              img = IO.popen("imgcat", 'w+b') do |io|
-                io.print open(m[2], 'rb', &:read)
-                io.close_write
-                io.read
-              end
-              results[index] = line.sub(m[1], img)
-            end
-            results[index] = nil
+            # TODO: Will fix When image download api is supported
+            results[index] = line
+            # threads << Thread.new(line, m) do |line, m|
+            #   img = IO.popen("imgcat", 'w+b') do |io|
+            #     io.print open(m[2], 'rb', &:read)
+            #     io.close_write
+            #     io.read
+            #   end
+            #   results[index] = line.sub(m[1], img)
+            # end
+            # results[index] = nil
           end
         else
           results[index] = line
