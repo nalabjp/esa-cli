@@ -101,17 +101,15 @@ class CLI
           if vo.raw
             results[index] = line
           else
-            # TODO: Will fix When image download api is supported
-            results[index] = line
-            # threads << Thread.new(line, m) do |line, m|
-            #   img = IO.popen("imgcat", 'w+b') do |io|
-            #     io.print open(m[2], 'rb', &:read)
-            #     io.close_write
-            #     io.read
-            #   end
-            #   results[index] = line.sub(m[1], img)
-            # end
-            # results[index] = nil
+            threads << Thread.new(line, m) do |line, m|
+              img = IO.popen("imgcat -height 20%", 'w+b') do |io|
+                io.print open(img_signed_url(m[2]), 'rb', &:read)
+                io.close_write
+                io.read
+              end
+              results[index] = line.sub(m[1], img)
+            end
+            results[index] = nil
           end
         else
           results[index] = line
@@ -159,12 +157,15 @@ class CLI
         cache.clear
         refresh.call
       when 0x0d # Enter
-        post = posts[off]
-        IO.popen(less_cmd(vo.q), "w") do |io|
-          io.puts post["url"]
-          io.puts post["full_name"].to_bold
-          io.puts
-          io.puts decorate.call(post["body_md"])
+        begin
+          post = posts[off]
+          IO.popen(less_cmd(vo.q), "w") do |io|
+            io.puts post["url"]
+            io.puts post["full_name"].to_bold
+            io.puts
+            io.puts decorate.call(post["body_md"])
+          end
+        rescue Errno::EPIPE
         end
       when 0x71 # q
         return
@@ -203,6 +204,10 @@ class CLI
       end
     end
     res.empty? ? nil : "-p '#{res.join('|')}'"
+  end
+
+  def img_signed_url(uri)
+    @client.signed_url(URI(uri).path).body['url']
   end
 end
 
