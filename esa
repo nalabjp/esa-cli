@@ -185,7 +185,7 @@ class CLI
 
   def less_cmd(query_string)
     @less_cmd ||= begin
-                    cmds = %W(less -rc -+F)
+                    cmds = %W(less -rc -+F -+X)
                     pattern_opt = less_pattern_option(query_string)
                     cmds.push(pattern_opt) if pattern_opt
                     cmds.join(' ')
